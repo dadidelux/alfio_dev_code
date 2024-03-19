@@ -43,3 +43,7 @@ Once the application is running, you can access it by visiting the following URL
 http://127.0.0.1:8000/search?query_title=Fast%20Shipping&top_k=5
 
 Replace Fast Shipping with your query title and adjust top_k to control the number of results returned.
+
+configure the Startup command from render
+uvicorn recommender:app --host 0.0.0.0 --port $PORT
+to make the program start
