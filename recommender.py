@@ -1,5 +1,6 @@
 import os
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 import faiss
@@ -17,6 +18,14 @@ output_file_path = os.path.join(alfio_dev_path, "pkl_output", "mabuhay_price.pkl
 
 app = FastAPI()
 
+# Add CORS middleware to allow connections from the specified origin
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Specify the allowed origin
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],  # Specify the allowed methods
+    allow_headers=["Content-Type", "Authorization"],  # Specify the allowed headers
+)
 
 # Load the CSV file
 df = pd.read_csv(csv_file_path)
