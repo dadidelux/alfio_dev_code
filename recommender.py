@@ -10,7 +10,11 @@ import os
 # deployment
 alfio_dev_path = "/opt/render/project/src/"
 #localhost
+<<<<<<< HEAD
 # alfio_dev_path = "../alfio_dev_p/"
+=======
+#alfio_dev_path = "../alfio_dev_p/"
+>>>>>>> 3583a35a141c37e36df7a710ac12a65740c22ecd
 
 # Construct the path to the CSV file
 csv_file_path = os.path.join(alfio_dev_path, "data", "mabuhay_price.csv")
