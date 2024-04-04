@@ -18,7 +18,7 @@ output_file_path = os.path.join(alfio_dev_path, "pkl_output", "mabuhay_price.pkl
 
 app = FastAPI()
 
-origins = ["https://mabuhaypadala.online/"]
+origins = ["https://mabuhaypadala.online/","https://212fa74c-1e7d-4f93-ae4c-8d14a89712dc-00-3j2c0tris6tsn.spock.replit.dev"]
 
 # Add CORS middleware to allow connections from the specified origin
 app.add_middleware(
