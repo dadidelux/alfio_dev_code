@@ -1,9 +1,11 @@
 import os
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 import faiss
+
+from arima_forecast import get_parcel_sum_daily , arima_forecast
 
 import os
 # Define the path to the alfio_dev folder
@@ -67,6 +69,17 @@ def search_similar_titles(query_title: str, top_k: int = 5):
     results = [{"title": title, "shipping_price": price, "similarity": dist}
                for title, price, dist in zip(similar_titles, shipping_prices, similarities)]
     return results
+
+
+@app.get("/arima_forecast")
+def arima_fast_api(startdate: str = Query(None), enddate: str = Query(None)):
+    data = get_parcel_sum_daily(startdate, enddate)
+    if data.empty:
+        return {"error": "No data found for the given date range"}
+    forecast_results = arima_forecast(data)
+    print(forecast_results)
+    return forecast_results
+
 
 if __name__ == "__main__":
     import uvicorn
