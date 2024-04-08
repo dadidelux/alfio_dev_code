@@ -103,22 +103,27 @@ def get_parcel_sum_daily(start_date, end_date):
             connection.close()
 
 
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 def arima_forecast(df):
-    print("processing forecast")
+    logger.debug("Processing forecast")
     df["Date"] = pd.to_datetime(df["Date"])
     df.set_index("Date", inplace=True)
     daily_df = df.resample("D").ffill()
     smoothed_df = daily_df.rolling(window=7, min_periods=1).mean()
     train_size = int(len(smoothed_df) * 0.8)
     train, test = smoothed_df.iloc[:train_size], smoothed_df.iloc[train_size:]
-    print("Training ARIMA")
+    logger.debug("Training ARIMA")
     arima_model = ARIMA(train, order=(5, 1, 1))
     arima_results = arima_model.fit()
     forecast = arima_results.get_forecast(steps=len(test))
     forecast_mean = forecast.predicted_mean
     forecast_mean = forecast_mean.apply(lambda x: str(x) if np.isfinite(x) else None)
-    print("Convert the forecast index (dates) to string format")
-    # Convert the forecast index (dates) to string format
+    logger.debug("Convert the forecast index (dates) to string format")
     forecast_mean.index = forecast_mean.index.strftime("%Y-%m-%d")
 
     mae = mean_absolute_error(test, forecast_mean.astype(float))
@@ -126,12 +131,11 @@ def arima_forecast(df):
     rmse = np.sqrt(mse)
     mape = np.mean(np.abs((test - forecast_mean.astype(float)) / test)) * 100
 
-    # Handle nan values in evaluation metrics
     mae = mae if np.isfinite(mae) else None
     mse = mse if np.isfinite(mse) else None
     rmse = rmse if np.isfinite(rmse) else None
     mape = mape if np.isfinite(mape) else None
-    print("Returning Result")
+    logger.debug("Returning Result")
     return {
         "dataset": df.reset_index().to_dict(orient="records"),
         "forecast": forecast_mean.to_dict(),
@@ -140,6 +144,7 @@ def arima_forecast(df):
         "rmse": rmse,
         "mape": mape,
     }
+
 
 
 @app.get("/arima_forecast")
