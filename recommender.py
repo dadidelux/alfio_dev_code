@@ -14,6 +14,12 @@ from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 import numpy as np
 
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 import os
 # Define the path to the alfio_dev folder
 # deployment
@@ -103,11 +109,6 @@ def get_parcel_sum_daily(start_date, end_date):
             connection.close()
 
 
-import logging
-
-# Set up logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
 
 def arima_forecast(df):
     logger.debug("Processing forecast")
@@ -146,14 +147,12 @@ def arima_forecast(df):
     }
 
 
-
 @app.get("/arima_forecast")
 def arima_fast_api(startdate: str = Query(None), enddate: str = Query(None)):
     data = get_parcel_sum_daily(startdate, enddate)
     if data.empty:
         return {"error": "No data found for the given date range"}
     forecast_results = arima_forecast(data)
-    print(forecast_results)
     return forecast_results
 
 
