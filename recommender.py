@@ -10,9 +10,9 @@ from arima_forecast import get_parcel_sum_daily , arima_forecast
 import os
 # Define the path to the alfio_dev folder
 # deployment
-alfio_dev_path = "/opt/render/project/src/"
+# alfio_dev_path = "/opt/render/project/src/"
 #localhost
-#alfio_dev_path = "../alfio_dev_p/"
+alfio_dev_path = "../alfio_dev_p/"
 
 # Construct the path to the CSV file
 csv_file_path = os.path.join(alfio_dev_path, "data", "mabuhay_price.csv")

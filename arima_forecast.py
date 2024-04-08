@@ -35,18 +35,20 @@ def get_parcel_sum_daily(start_date, end_date):
 
 
 def arima_forecast(df):
+    print("processing forecast")
     df["Date"] = pd.to_datetime(df["Date"])
     df.set_index("Date", inplace=True)
     daily_df = df.resample("D").ffill()
     smoothed_df = daily_df.rolling(window=7, min_periods=1).mean()
     train_size = int(len(smoothed_df) * 0.8)
     train, test = smoothed_df.iloc[:train_size], smoothed_df.iloc[train_size:]
+    print("Training ARIMA")
     arima_model = ARIMA(train, order=(5, 1, 1))
     arima_results = arima_model.fit()
     forecast = arima_results.get_forecast(steps=len(test))
     forecast_mean = forecast.predicted_mean
     forecast_mean = forecast_mean.apply(lambda x: str(x) if np.isfinite(x) else None)
-
+    print("Convert the forecast index (dates) to string format")
     # Convert the forecast index (dates) to string format
     forecast_mean.index = forecast_mean.index.strftime("%Y-%m-%d")
 
@@ -60,7 +62,7 @@ def arima_forecast(df):
     mse = mse if np.isfinite(mse) else None
     rmse = rmse if np.isfinite(rmse) else None
     mape = mape if np.isfinite(mape) else None
-
+    print("Returning Result")
     return {
         "dataset": df.reset_index().to_dict(orient="records"),
         "forecast": forecast_mean.to_dict(),
