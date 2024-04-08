@@ -142,7 +142,7 @@ def arima_forecast(df):
         "mae": mae,
         "mse": mse,
         "rmse": rmse,
-        "mape": mape,
+        # "mape": mape,
     }
 
 
