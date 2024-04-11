@@ -127,6 +127,18 @@ def arima_forecast(df):
     logger.debug("Convert the forecast index (dates) to string format")
     forecast_mean.index = forecast_mean.index.strftime("%Y-%m-%d")
 
+    # Train another ARIMA model on the entire dataset and forecast beyond the end
+    logger.debug("Training second ARIMA for extended forecast")
+    full_arima_model = ARIMA(smoothed_df, order=(5, 1, 1))
+    full_arima_results = full_arima_model.fit()
+    forecast_two = full_arima_results.get_forecast(steps=10)  # Forecast 10 days beyond the end
+    forecast_two_mean = forecast_two.predicted_mean
+    forecast_two_conf_int = forecast_two.conf_int(alpha=0.05)  # 95% confidence interval
+    forecast_two_mean = forecast_two_mean.apply(lambda x: str(x) if np.isfinite(x) else None)
+    forecast_two_conf_int = forecast_two_conf_int.applymap(lambda x: str(x) if np.isfinite(x) else None)
+    forecast_two_mean.index = forecast_two_mean.index.strftime("%Y-%m-%d")
+    forecast_two_conf_int.index = forecast_two_conf_int.index.strftime("%Y-%m-%d")
+
     mae = mean_absolute_error(test, forecast_mean.astype(float))
     mse = mean_squared_error(test, forecast_mean.astype(float))
     rmse = np.sqrt(mse)
@@ -140,11 +152,14 @@ def arima_forecast(df):
     return {
         "dataset": df.reset_index().to_dict(orient="records"),
         "forecast": forecast_mean.to_dict(),
+        "forecast_two": forecast_two_mean.to_dict(),
+        "forecast_two_conf_int": forecast_two_conf_int.to_dict(),  # Add the confidence interval to the result
         "mae": mae,
         "mse": mse,
         "rmse": rmse,
         # "mape": mape,
     }
+
 
 
 @app.get("/arima_forecast")
