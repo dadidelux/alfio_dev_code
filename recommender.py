@@ -23,11 +23,11 @@ logger = logging.getLogger(__name__)
 import os
 # Define the path to the alfio_dev folder
 # deployment
-# alfio_dev_path = "/opt/render/project/src/"
+alfio_dev_path = "/opt/render/project/src/"
 #localhost
 # alfio_dev_path = "../alfio_dev_p/"
 # Windows
-alfio_dev_path = "C:\\Users\\dadidelux\\Desktop\\DevBryan\\alfio_dev_code"
+# alfio_dev_path = "C:\\Users\\dadidelux\\Desktop\\DevBryan\\alfio_dev_code"
 
 # Construct the path to the CSV file
 csv_file_path = os.path.join(alfio_dev_path, "data", "mabuhay_price.csv")
