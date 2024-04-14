@@ -23,9 +23,11 @@ logger = logging.getLogger(__name__)
 import os
 # Define the path to the alfio_dev folder
 # deployment
-alfio_dev_path = "/opt/render/project/src/"
+# alfio_dev_path = "/opt/render/project/src/"
 #localhost
 # alfio_dev_path = "../alfio_dev_p/"
+# Windows
+alfio_dev_path = "C:\\Users\\dadidelux\\Desktop\\DevBryan\\alfio_dev_code"
 
 # Construct the path to the CSV file
 csv_file_path = os.path.join(alfio_dev_path, "data", "mabuhay_price.csv")
@@ -151,9 +153,11 @@ def arima_forecast_two(startdate: str = Query(None), enddate: str = Query(None))
     if data.empty:
         return {"error": "No data found for the given date range"}
 
-    df["Date"] = pd.to_datetime(data["Date"])
-    df.set_index("Date", inplace=True)
-    daily_df = df.resample("D").ffill()
+    # Ensure no duplicate dates
+    data['Date'] = pd.to_datetime(data['Date'])
+    data = data.drop_duplicates(subset='Date', keep='first').set_index('Date')
+
+    daily_df = data.resample("D").ffill()
     smoothed_df = daily_df.rolling(window=7, min_periods=1).mean()
 
     full_arima_model = ARIMA(smoothed_df, order=(5, 1, 1))
