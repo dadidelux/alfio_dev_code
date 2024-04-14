@@ -124,11 +124,38 @@ def arima_forecast(df):
     forecast = arima_results.get_forecast(steps=len(test))
     forecast_mean = forecast.predicted_mean
     forecast_mean = forecast_mean.apply(lambda x: str(x) if np.isfinite(x) else None)
-    logger.debug("Convert the forecast index (dates) to string format")
     forecast_mean.index = forecast_mean.index.strftime("%Y-%m-%d")
+    mae = mean_absolute_error(test, forecast_mean.astype(float))
+    mse = mean_squared_error(test, forecast_mean.astype(float))
+    rmse = np.sqrt(mse)
 
-    # Train another ARIMA model on the entire dataset and forecast beyond the end
-    logger.debug("Training second ARIMA for extended forecast")
+    return {
+        "dataset": df.reset_index().to_dict(orient="records"),
+        "forecast": forecast_mean.to_dict(),
+        "mae": mae,
+        "mse": mse,
+        "rmse": rmse,
+    }
+
+@app.get("/arima_forecast")
+def arima_fast_api(startdate: str = Query(None), enddate: str = Query(None)):
+    data = get_parcel_sum_daily(startdate, enddate)
+    if data.empty:
+        return {"error": "No data found for the given date range"}
+    forecast_results = arima_forecast(data)
+    return forecast_results
+
+@app.get("/arima_forecast_two")
+def arima_forecast_two(startdate: str = Query(None), enddate: str = Query(None)):
+    data = get_parcel_sum_daily(startdate, enddate)
+    if data.empty:
+        return {"error": "No data found for the given date range"}
+
+    df["Date"] = pd.to_datetime(data["Date"])
+    df.set_index("Date", inplace=True)
+    daily_df = df.resample("D").ffill()
+    smoothed_df = daily_df.rolling(window=7, min_periods=1).mean()
+
     full_arima_model = ARIMA(smoothed_df, order=(5, 1, 1))
     full_arima_results = full_arima_model.fit()
     forecast_two = full_arima_results.get_forecast(steps=10)  # Forecast 10 days beyond the end
@@ -139,36 +166,10 @@ def arima_forecast(df):
     forecast_two_mean.index = forecast_two_mean.index.strftime("%Y-%m-%d")
     forecast_two_conf_int.index = forecast_two_conf_int.index.strftime("%Y-%m-%d")
 
-    mae = mean_absolute_error(test, forecast_mean.astype(float))
-    mse = mean_squared_error(test, forecast_mean.astype(float))
-    rmse = np.sqrt(mse)
-    mape = np.mean(np.abs((test - forecast_mean.astype(float)) / test)) * 100
-
-    mae = mae if np.isfinite(mae) else None
-    mse = mse if np.isfinite(mse) else None
-    rmse = rmse if np.isfinite(rmse) else None
-    mape = mape if np.isfinite(mape) else None
-    logger.debug("Returning Result")
     return {
-        "dataset": df.reset_index().to_dict(orient="records"),
-        "forecast": forecast_mean.to_dict(),
         "forecast_two": forecast_two_mean.to_dict(),
-        "forecast_two_conf_int": forecast_two_conf_int.to_dict(),  # Add the confidence interval to the result
-        "mae": mae,
-        "mse": mse,
-        "rmse": rmse,
-        # "mape": mape,
+        "forecast_two_conf_int": forecast_two_conf_int.to_dict(),
     }
-
-
-
-@app.get("/arima_forecast")
-def arima_fast_api(startdate: str = Query(None), enddate: str = Query(None)):
-    data = get_parcel_sum_daily(startdate, enddate)
-    if data.empty:
-        return {"error": "No data found for the given date range"}
-    forecast_results = arima_forecast(data)
-    return forecast_results
 
 
 if __name__ == "__main__":
