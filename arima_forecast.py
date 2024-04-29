@@ -10,9 +10,9 @@ app = FastAPI()
 
 DB_CONFIG = {
     "host": "srv946.hstgr.io",
-    "database": "u955224677_mpc_prod",
-    "user": "u955224677_mpc_prod",
-    "password": "s:A6*O|BWI4",
+    "database": "u955224677_mpc_new_dev",
+    "user": "u955224677_mpc_new_dev",
+    "password": "R]geF|h2vX20",
 }
 
 
