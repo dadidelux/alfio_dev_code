@@ -43,7 +43,7 @@ def arima_forecast(df):
     train_size = int(len(smoothed_df) * 0.8)
     train, test = smoothed_df.iloc[:train_size], smoothed_df.iloc[train_size:]
     print("Training ARIMA")
-    arima_model = ARIMA(train, order=(5, 1, 1))
+    arima_model = ARIMA(train, order=(3, 1, 1))
     arima_results = arima_model.fit()
     forecast = arima_results.get_forecast(steps=len(test))
     forecast_mean = forecast.predicted_mean
